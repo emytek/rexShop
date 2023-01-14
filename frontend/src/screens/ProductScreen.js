@@ -1,25 +1,34 @@
 import React, {useState, useEffect} from 'react'
 // import { ListGroup } from 'react-bootstrap'
-import { useParams } from 'react-router'
+// import { useParams } from 'react-router'
 import { Link } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
 import { Row, Col, Image, ListGroup, Card, Button} from 'react-bootstrap'
 import Rating from '../components/Rating'
+import { listProductDetails } from '../actions/productActions'
+import Loader from '../components/Loader'
+import Message from '../components/Message'
 // import products from '../products' 
 import axios from 'axios'
 
-const ProductScreen = () => {
-    const [product, setProduct] = useState({})
-    const { productId } = useParams()
+const ProductScreen = ({ match }) => {
+    // const [product, setProduct] = useState({})
+    const [qty, setQty] = useState(0)
+    const dispatch = useDispatch()
+    // const { id } = useParams()
+    const productDetails = useSelector((state) => state.productDetails)
+    const { loading, error, product } = productDetails
     
     useEffect(() => {
-      const fetchProduct = async () => {
-          const {data} =  await axios.get(`/api/products/${productId}`)
-          // console.log(data);
+      // const fetchProduct = async () => {
+      //     const {data} =  await axios.get(`/api/products/${productId}`)
+      //     // console.log(data);
 
-          setProduct(data)
-      }
-      fetchProduct()
-  },[])
+      //     setProduct(data)
+      // }
+      // fetchProduct()
+      dispatch(listProductDetails(match.params.id))
+  },[dispatch, match])
 
     // const product = products.find(p => p._id === match.params.id)
     
@@ -29,6 +38,8 @@ const ProductScreen = () => {
   return (
     <>
       <Link className="btn btn-light my-3" to='/'>Go Back</Link>
+      { loading ? (< Loader/>) : error ? 
+      <Message variant='danger'></Message> : 
       <Row>
         <Col md={6}>
               <Image src={product.image} alt={product.name} fluid />
@@ -71,6 +82,28 @@ const ProductScreen = () => {
                             </Row>
                         </ListGroup.Item>
 
+                    {product.countInStock > 0 && (
+                      <ListGroup.Item>
+                        <Row>
+                          <Col>Qty</Col>
+                          <Col>
+                            <Form.Control
+                              as='select'
+                              value={qty}
+                              onChange={(e) => setQty(e.target.value)}
+                            >
+                              {[...Array(product.countInStock).keys()].map(
+                                (x) => (
+                                  <option key={x + 1} value={x + 1}>
+                                    {x + 1}
+                                  </option>
+                                )
+                              )}
+                            </Form.Control>
+                          </Col>
+                        </Row>
+                      </ListGroup.Item>
+                    )}
                         <ListGroup.Item>
                             <Button
                             // onClick={addToCartHandler}
@@ -84,7 +117,7 @@ const ProductScreen = () => {
                     </ListGroup>
                 </Card>
             </Col>
-      </Row>
+      </Row>}
     </>
   )
 }
