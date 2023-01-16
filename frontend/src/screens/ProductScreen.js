@@ -3,7 +3,7 @@ import React, {useState, useEffect} from 'react'
 // import { useParams } from 'react-router'
 import { Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { Row, Col, Image, ListGroup, Card, Button} from 'react-bootstrap'
+import { Row, Col, Image, ListGroup, Card, Button, Form} from 'react-bootstrap'
 import Rating from '../components/Rating'
 import { listProductDetails } from '../actions/productActions'
 import Loader from '../components/Loader'
@@ -11,9 +11,9 @@ import Message from '../components/Message'
 // import products from '../products' 
 import axios from 'axios'
 
-const ProductScreen = ({ match }) => {
+const ProductScreen = ({ history, match }) => {
     // const [product, setProduct] = useState({})
-    const [qty, setQty] = useState(0)
+    const [qty, setQty] = useState(1)
     const dispatch = useDispatch()
     // const { id } = useParams()
     const productDetails = useSelector((state) => state.productDetails)
@@ -34,6 +34,20 @@ const ProductScreen = ({ match }) => {
     
     // const product = products.find((product) => product._id === productId)
     // const {name, image} = product
+
+    const addToCartHandler = () => {
+      history.push(`/cart/${match.params.id}?qty=${qty}`)
+    }
+  
+    // const submitHandler = (e) => {
+    //   e.preventDefault()
+    //   dispatch(
+    //     createProductReview(match.params.id, {
+    //       rating,
+    //       comment,
+    //     })
+    //   )
+    // }
 
   return (
     <>
@@ -93,8 +107,10 @@ const ProductScreen = ({ match }) => {
                               onChange={(e) => setQty(e.target.value)}
                             >
                               {[...Array(product.countInStock).keys()].map(
+                                //example if the countInStock is 5 , we want to have an array like [0,1,2,3,4] 
                                 (x) => (
-                                  <option key={x + 1} value={x + 1}>
+                                  <option key={x + 1} value={x + 1}>  
+                                  {/* cos we are having a value of 1 - 5  */}
                                     {x + 1}
                                   </option>
                                 )
@@ -106,7 +122,7 @@ const ProductScreen = ({ match }) => {
                     )}
                         <ListGroup.Item>
                             <Button
-                            // onClick={addToCartHandler}
+                            onClick={addToCartHandler}
                             className='btn-block'
                             type='button'
                             disabled={product.countInStock === 0}
